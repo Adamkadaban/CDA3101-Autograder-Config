@@ -4,8 +4,6 @@
 
 cd /autograder/source
 
-cd ./emulator/scripts
-
 NCPU=2
 MEM=1G
 
@@ -22,8 +20,6 @@ qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
 					-daemonize \
 					-display none
 
-
-cd ../../
 
 # to make sure qemu has had a chance to start
 sleep 10
