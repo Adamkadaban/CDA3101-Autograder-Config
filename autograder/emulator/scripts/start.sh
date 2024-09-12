@@ -13,4 +13,5 @@ qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
                     -device e1000,netdev=net0 \
                     -netdev user,id=net0,hostfwd=tcp::3101-:22 \
                     -nic user,model=virtio-net-pci \
-                    -nographic
+					-daemonize \
+					-display none
