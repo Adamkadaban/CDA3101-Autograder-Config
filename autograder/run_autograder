@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+#cp /autograder/submission/pa1.s /autograder/source/pa1.s
+
+cd /autograder/source
+
+cd ./emulator/scripts
+
+./start.sh &
+
+cd ../../
+
+python3 grade.py
