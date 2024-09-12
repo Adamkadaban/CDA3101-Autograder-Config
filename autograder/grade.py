@@ -5,6 +5,8 @@ from pwn import *
 from os import listdir as os_listdir
 import os.path
 
+context.log_level='warn'
+
 source_name = 'pa1.s'
 compiles_max = 10
 test_case_max = 80
@@ -12,7 +14,7 @@ exists_max = 10
 
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
-source_path = f'/autograder/submission/{source_name}'
+source_path = f'/autograder/submission/pa1.txt'
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
