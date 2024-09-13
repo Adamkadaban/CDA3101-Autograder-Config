@@ -76,7 +76,7 @@ for testcaseidx in range(num_testcases):
 		"max_score": points_per_testcase,
 		"status": "passed" if passed else "failed",
 		"name_format": "text",
-		"output":f"Student output:\n{student_stdout}\n\nExpected output:\n{tc_stdout}\n",
+		"output":f"User input:\n{tc_stdin}\n\nStudent output:\n{student_stdout}\n\nExpected output:\n{tc_stdout}\n",
 		"output_format": "text",
 		"visibility": "visible",
 	}
