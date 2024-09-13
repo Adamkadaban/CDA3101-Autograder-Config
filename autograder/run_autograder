@@ -21,7 +21,11 @@ qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
 					-display none
 
 
-# to make sure qemu has had a chance to start
+# wait for port to open. this indicates service is running
+until nc -w 10 127.0.0.1 3101; do sleep 1; done
+
+
+# to make sure ssh has had a chance to start properly
 sleep 10
 
 python3 grade.py
