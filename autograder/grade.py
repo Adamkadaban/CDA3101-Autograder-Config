@@ -14,7 +14,9 @@ exists_max = 10
 
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
-source_path = f'/autograder/submission/pa1.txt'
+submission_filename = os_listdir('/autograder/submission/')[0] # we assume a file exists, as a student must submit a file for the program to run
+source_path = f'/autograder/submission/{submission_filename}'
+
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
