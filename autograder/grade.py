@@ -67,7 +67,7 @@ for testcaseidx in range(num_testcases):
 
 	student_stdout = r(f'echo {tc_stdin}\\n | ./{bin_name}')
 
-	passed = ( tc_stdout.replace(' ', '').replace('\t', '')  == student_stdout.replace(' ', '').replace('\t', '') )
+	passed = ( tc_stdout.replace(' ', '').replace('\t', '').replace('\n', '')  == student_stdout.replace(' ', '').replace('\t', '').replace('\n', '') )
 	if passed:
 		total_score += points_per_testcase
 
