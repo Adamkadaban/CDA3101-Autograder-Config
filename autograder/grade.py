@@ -65,7 +65,7 @@ for testcaseidx in range(num_testcases):
 	with open(f'./testcases/Output/{testcaseidx + 1}.out', 'rb') as fin:
 		tc_stdout = fin.read().rstrip()
 
-	student_stdout = r(f'echo {tc_stdin}\\n | ./{bin_name}')
+	student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
 
 	passed = ( tc_stdout.replace(b' ', b'').replace(b'\t', b'').replace(b'\n', b'')  == student_stdout.replace(b' ', b'').replace(b'\t', b'').replace(b'\n', b'') )
 	if passed:
