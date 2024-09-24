@@ -56,6 +56,7 @@ else:
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
+	exit(-1)
 
 ## testcases
 
