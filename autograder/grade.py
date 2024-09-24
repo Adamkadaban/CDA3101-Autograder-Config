@@ -68,7 +68,7 @@ for testcaseidx in range(num_testcases):
 
 	student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
 
-	passed = ( [i for i in student_stdout if not i.isspace()] == [i for i in tc_stdout if not i.isspace()] )
+	passed = ( [i for i in student_stdout if i not in b' \n\t\r'] == [i for i in tc_stdout if i not b' \n\t\r'] )
 	if passed:
 		total_score += points_per_testcase
 
