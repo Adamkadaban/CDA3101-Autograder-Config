@@ -5,7 +5,7 @@ from pwn import *
 from os import listdir as os_listdir
 import os.path
 
-context.log_level='warn'
+context.log_level='debug'
 
 source_name = 'pa1.s'
 compiles_max = 10
