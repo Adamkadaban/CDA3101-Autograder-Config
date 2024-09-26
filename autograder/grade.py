@@ -39,7 +39,7 @@ else:
 	print('no submission')
 	fail_dict = {
 		"score": 0,
-		"output": "No file by the name 'pa1.s' can be found",
+		"output": "No file with the `.s' extension found",
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
