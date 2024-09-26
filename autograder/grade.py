@@ -20,7 +20,7 @@ source_path = f'/autograder/submission/{submission_filename}'
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
-exists = ( os.path.exists(source_path) )
+exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == 's' )
 
 r = ssh(user='root', password='root', host='localhost', port=3101, timeout=ssh_timeout)
 r.upload_file(source_path, f'/root/{source_name}')
