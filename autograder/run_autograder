@@ -4,11 +4,12 @@
 
 cd /autograder/source
 
-NCPU=2
-MEM=1G
+start_emulator() {
+    echo "Starting emualtor"
+    NCPU=2
+    MEM=1G
 
-
-qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
+    qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
                     -initrd ./emulator/initrd.img-4.9.0-4-arm64 \
                     -kernel ./emulator/vmlinuz-4.9.0-4-arm64 -append "root=/dev/sda2 console=ttyAMA0" \
                     -global virtio-blk-device.scsi=off \
@@ -18,10 +19,16 @@ qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
                     -device e1000,netdev=net0 \
                     -netdev user,id=net0,hostfwd=tcp::3101-:22 \
                     -nic user,model=virtio-net-pci \
-					-daemonize \
-					-display none
+                    -daemonize \
+                    -display none
+}
 
 while true; do
+    nc -z localhost 3101
+    if [ $? -ne 0 ]; then
+        start_emulator
+    fi
+
     # wait for port to open. this indicates service is running
     until nc -w 10 127.0.0.1 3101; do sleep 1; done
 
