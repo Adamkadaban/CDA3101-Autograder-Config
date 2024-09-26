@@ -36,6 +36,7 @@ testcases = []
 if exists:
 	total_score += exists_max
 else:
+	print('no submission')
 	fail_dict = {
 		"score": 0,
 		"output": "No file by the name 'pa1.s' can be found",
@@ -50,6 +51,7 @@ compiles = ( r(f'gcc {source_name} -o {bin_name} 2>/dev/null; echo $?') == b'0')
 if compiles:
 	total_score += compiles_max
 else:
+	print('failed to compile')
 	fail_dict = {
 		"score": 10,
 		"output": "Failed to compile",
