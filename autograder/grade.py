@@ -42,7 +42,7 @@ else:
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
-	exit(-1)
+	exit(0)
 ## compiles
 
 compiles = ( r(f'gcc {source_name} -o {bin_name} 2>/dev/null; echo $?') == b'0')
@@ -56,7 +56,7 @@ else:
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
-	exit(-1)
+	exit(0)
 
 ## testcases
 
