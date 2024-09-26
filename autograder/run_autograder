@@ -8,23 +8,22 @@ NCPU=2
 MEM=1G
 
 
-while true; do
-    qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
-                        -initrd ./emulator/initrd.img-4.9.0-4-arm64 \
-                        -kernel ./emulator/vmlinuz-4.9.0-4-arm64 -append "root=/dev/sda2 console=ttyAMA0" \
-                        -global virtio-blk-device.scsi=off \
-                        -device virtio-scsi-device,id=scsi \
-                        -drive file=./emulator/disk.qcow2,id=rootimg,cache=unsafe,if=none \
-                        -device scsi-hd,drive=rootimg \
-                        -device e1000,netdev=net0 \
-                        -netdev user,id=net0,hostfwd=tcp::3101-:22 \
-                        -nic user,model=virtio-net-pci \
-    					-daemonize \
-    					-display none
+qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
+                    -initrd ./emulator/initrd.img-4.9.0-4-arm64 \
+                    -kernel ./emulator/vmlinuz-4.9.0-4-arm64 -append "root=/dev/sda2 console=ttyAMA0" \
+                    -global virtio-blk-device.scsi=off \
+                    -device virtio-scsi-device,id=scsi \
+                    -drive file=./emulator/disk.qcow2,id=rootimg,cache=unsafe,if=none \
+                    -device scsi-hd,drive=rootimg \
+                    -device e1000,netdev=net0 \
+                    -netdev user,id=net0,hostfwd=tcp::3101-:22 \
+                    -nic user,model=virtio-net-pci \
+					-daemonize \
+					-display none
 
+while true; do
     # wait for port to open. this indicates service is running
     until nc -w 10 127.0.0.1 3101; do sleep 1; done
-
 
     # to make sure ssh has had a chance to start properly
     sleep 10
