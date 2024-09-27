@@ -41,7 +41,8 @@ for try in $(seq 1 $MAXRETRYS); do
     # to make sure ssh has had a chance to start properly
     sleep 10
 
-    timeout $TIMEOUT python3 grade.py
+	echo "Running grading script"
+    timeout -v $TIMEOUT python3 grade.py
 
     if [ $? -eq 0 ]; then
         echo "Grading succeeded."
