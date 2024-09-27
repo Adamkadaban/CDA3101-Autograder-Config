@@ -8,7 +8,7 @@ TIMEOUT=60
 cd /autograder/source
 
 start_emulator() {
-    echo "Starting emualtor"
+    echo "Starting emulator"
     NCPU=2
     MEM=1G
 
