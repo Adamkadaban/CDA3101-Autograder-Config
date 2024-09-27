@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 MAXRETRYS=5
+TIMEOUT=60
 
 #cp /autograder/submission/pa1.s /autograder/source/pa1.s
 
@@ -40,7 +41,7 @@ for try in {1..$MAXRETRYS}; do
     # to make sure ssh has had a chance to start properly
     sleep 10
 
-    python3 grade.py
+    timeout $TIMEOUT python3 grade.py
 
     if [ $? -eq 0 ]; then
         echo "Grading succeeded."
