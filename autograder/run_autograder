@@ -28,7 +28,7 @@ start_emulator() {
 
 status=0
 
-for try in {1..$MAXRETRYS}; do
+for try in $(seq 1 $MAXRETRYS); do
 	echo "Try $try"
     nc -z localhost 3101
     if [ $? -ne 0 ]; then
