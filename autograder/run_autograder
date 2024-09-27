@@ -53,7 +53,7 @@ done
 
 # If grading still didn't work after max trys
 if [ $status -eq 1 ]; then
-	echo "Grading failed."
+	echo "Grading failed with unknown error."
 	cp fail.json /autograder/results/results.json
 fi
 
