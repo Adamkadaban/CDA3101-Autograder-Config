@@ -23,7 +23,10 @@ start_emulator() {
                     -display none
 }
 
-while true; do
+status=0
+
+for try in {1..5}; do
+	echo "Try $try"
     nc -z localhost 3101
     if [ $? -ne 0 ]; then
         start_emulator
@@ -39,10 +42,19 @@ while true; do
 
     if [ $? -eq 0 ]; then
         echo "Grading succeeded."
+		status=0
         break
     else
         echo "Grading failed. Retrying..."
+		status=1
         sleep 5
     fi
 done
+
+# If grading still didn't work after max trys
+if [ $status -eq 1 ]; then
+	echo "Grading failed."
+	cp fail.json /autograder/results/results.json
+fi
+
 
