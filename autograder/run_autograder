@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+MAXRETRYS=5
+
 #cp /autograder/submission/pa1.s /autograder/source/pa1.s
 
 cd /autograder/source
@@ -25,7 +27,7 @@ start_emulator() {
 
 status=0
 
-for try in {1..5}; do
+for try in {1..$MAXRETRYS}; do
 	echo "Try $try"
     nc -z localhost 3101
     if [ $? -ne 0 ]; then
