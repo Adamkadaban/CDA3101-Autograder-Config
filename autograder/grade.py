@@ -97,8 +97,7 @@ for testcaseidx in range(num_testcases):
 # 3 minutes of leeway for emulator to start
 due_time = datetime(2024, 10, 1, 2, 4, 0, tzinfo=timezone.utc)
 
-days_late = ((student_submission_time - due_time).total_seconds()
- * 60 * 24)
+days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
 print(f'DAYS LATE: {days_late}')
 
 
