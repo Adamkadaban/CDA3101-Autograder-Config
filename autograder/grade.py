@@ -6,8 +6,6 @@ from os import listdir as os_listdir
 import os.path
 from datetime import datetime, timezone
 
-student_submission_time = datetime.now(timezone.utc)
-
 context.log_level='debug'
 
 source_name = 'pa1.s'
@@ -31,6 +29,30 @@ r.upload_file(source_path, f'/root/{source_name}')
 
 total_score = 0
 testcases = []
+
+
+## calculate late penalty
+student_submission_time = datetime.now(timezone.utc)
+
+# utc is 4 hours ahead of est
+# that means deadline is 3:59
+# 3 minutes of leeway for emulator to start
+due_time = datetime(2024, 10, 1, 4, 2, 0, tzinfo=timezone.utc)
+
+days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
+print(f'DAYS LATE: {days_late}')
+
+
+if days_late <= 0:
+    penalty = 0
+elif days_late <= 1:
+    penalty = -10
+elif days_late <= 2:
+    penalty = -20
+elif days_late <= 3:
+    penalty = -30
+else:
+    penalty = -100
 
 # rubric
 
@@ -56,7 +78,7 @@ if compiles:
 else:
 	print('failed to compile')
 	fail_dict = {
-		"score": 10,
+		"score": max(10 + penalty, 0),
 		"output": "Failed to compile",
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
@@ -90,32 +112,8 @@ for testcaseidx in range(num_testcases):
 
 # gradescope results
 
-## calculate late penalty
-
-# utc is 4 hours ahead of est
-# that means deadline is 3:59
-# 3 minutes of leeway for emulator to start
-due_time = datetime(2024, 10, 1, 4, 2, 0, tzinfo=timezone.utc)
-
-days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
-print(f'DAYS LATE: {days_late}')
-
-
-if days_late <= 0:
-    penalty = 0
-elif days_late <= 1:
-    penalty = -10
-elif days_late <= 2:
-    penalty = -20
-elif days_late <= 3:
-    penalty = -30
-else:
-    penalty = -100
-
-total_score += penalty
-
 student_score = {
-	"score": max(total_score, 0),
+	"score": max(total_score + penalty, 0),
 	"tests": testcases,
 }
 
