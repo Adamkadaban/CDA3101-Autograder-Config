@@ -38,7 +38,7 @@ student_submission_time = datetime.now(timezone.utc)
 # utc is 4 hours ahead of est
 # that means deadline is 3:59
 # 3 minutes of leeway for emulator to start
-due_time = datetime(2024, 10, 1, 4, 2, 0, tzinfo=timezone.utc)
+due_time = datetime(2024, 10, 28, 4, 2, 0, tzinfo=timezone.utc)
 
 days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
 print(f'DAYS LATE: {days_late}')
@@ -52,6 +52,8 @@ elif days_late <= 2:
     penalty = -20
 elif days_late <= 3:
     penalty = -30
+elif days_late <= 4:
+	penalty = -40
 else:
     penalty = -100
 
