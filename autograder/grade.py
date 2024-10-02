@@ -8,10 +8,11 @@ from datetime import datetime, timezone
 
 context.log_level='debug'
 
-source_name = 'pa1.s'
+source_name = 'pa2.s'
 compiles_max = 10
-test_case_max = 80
+test_case_max = 50
 exists_max = 10
+recursive_max = 30
 
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
