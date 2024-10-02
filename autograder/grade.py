@@ -111,6 +111,31 @@ for testcaseidx in range(num_testcases):
 	}
 	testcases.append(testcase_dict)
 
+# recursive testcase
+
+with open('./testcases/big.in', 'r') as fin:
+	tc_stdin = fin.read().rstrip()
+
+probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' )
+
+if probably_recursive:
+	total_score += recursive_max
+else:
+	print('probably not recursive')
+
+testcase_dict = {
+    "score": recursive_max if probably_recursive else 0,
+    "max_score": recursive_max,
+    "status": "passed" if passed else "failed",
+    "name_format": "text",
+    "output":"recursive" if probably_recursive else "not recursive",
+    "output_format": "text",
+    "visibility": "visible",
+}
+testcases.append(testcase_dict)
+
+
+
 # gradescope results
 
 student_score = {
