@@ -19,6 +19,9 @@ ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 submission_filename = os_listdir('/autograder/submission/')[0] # we assume a file exists, as a student must submit a file for the program to run
 source_path = f'/autograder/submission/{submission_filename}'
 
+with open(source_path, 'rb') as fin:
+	source_code = fin.read()
+
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
@@ -118,7 +121,7 @@ for testcaseidx in range(num_testcases):
 with open('./testcases/big.in', 'r') as fin:
 	tc_stdin = fin.read().rstrip()
 
-probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' )
+probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' ) and (b'x28' in source_code or b'sp' in source_code)
 
 if probably_recursive:
 	total_score += recursive_max
