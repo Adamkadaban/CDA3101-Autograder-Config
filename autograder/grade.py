@@ -6,7 +6,7 @@ from os import listdir as os_listdir
 import os.path
 from datetime import datetime, timezone
 
-context.log_level='debug'
+context.log_level='error'
 
 source_name = 'pa2.s'
 compiles_max = 10
