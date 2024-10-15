@@ -57,6 +57,8 @@ elif days_late <= 3:
     penalty = -30
 elif days_late <= 4:
 	penalty = -40
+elif days_late <= 5:
+	penalty = -50
 else:
     penalty = -100
 
