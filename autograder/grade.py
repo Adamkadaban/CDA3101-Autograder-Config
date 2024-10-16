@@ -95,7 +95,7 @@ else:
 
 for testcaseidx in range(num_testcases):
 	with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
-		tc_stdin = fin.read().rstrip()
+		tc_stdin = fin.read()
 	with open(f'./testcases/Output/{testcaseidx + 1}.out', 'rb') as fin:
 		tc_stdout = fin.read().rstrip()
 
