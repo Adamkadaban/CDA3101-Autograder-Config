@@ -95,8 +95,8 @@ else:
 ## testcases
 
 for testcaseidx in range(num_testcases):
-	# with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
-	# 	tc_stdin = fin.read()
+	with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
+		tc_stdin = fin.read()
 	r(f'stdbuf -oL ./{bin_name} <./testcases/Input/{testcaseidx + 1}.in >test-{testcaseidx + 1}.out')
 	student_stdout = r.download_data(f'test-{testcaseidx + 1}.out')
 
