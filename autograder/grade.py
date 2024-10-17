@@ -29,6 +29,7 @@ exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == 's' )
 
 r = ssh(user='root', password='root', host='localhost', port=3101, timeout=ssh_timeout)
 r.upload_file(source_path, f'/root/{source_name}')
+r.upload('testcases')
 
 
 total_score = 0
@@ -94,12 +95,15 @@ else:
 ## testcases
 
 for testcaseidx in range(num_testcases):
-	with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
-		tc_stdin = fin.read()
+	# with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
+	# 	tc_stdin = fin.read()
+	r(f'stdbuf -oL ./{bin_name} <./testcases/Input/{testcaseidx + 1}.in >test-{testcaseidx + 1}.out')
+	student_stdout = r.download_data(f'test-{testcaseidx + 1}.out')
+
 	with open(f'./testcases/Output/{testcaseidx + 1}.out', 'rb') as fin:
 		tc_stdout = fin.read().rstrip()
 
-	student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
+	#student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
 
 	passed = ( [i for i in student_stdout if i not in b' \n\t\r'] == [i for i in tc_stdout if i not in b' \n\t\r'] )
 	if passed:
