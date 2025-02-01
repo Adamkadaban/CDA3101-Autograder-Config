@@ -126,7 +126,7 @@ for testcaseidx in range(num_testcases):
 	testcases.append(testcase_dict)
 
 # recursive testcase
-
+'''
 with open('./testcases/big.in', 'r') as fin:
 	tc_stdin = fin.read().rstrip()
 
@@ -147,9 +147,7 @@ testcase_dict = {
     "visibility": "visible",
 }
 #testcases.append(testcase_dict)
-
-
-
+'''
 # gradescope results
 
 student_score = {
