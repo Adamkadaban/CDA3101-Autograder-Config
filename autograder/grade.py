@@ -8,11 +8,10 @@ from datetime import datetime, timezone
 
 context.log_level='error'
 
-source_name = 'pa2.s'
-compiles_max = 10
-test_case_max = 50
+source_name = 'pa1.s'
+compiles_max = 20
+test_case_max = 70
 exists_max = 10
-recursive_max = 30
 
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
@@ -42,7 +41,7 @@ student_submission_time = datetime.now(timezone.utc)
 # utc is 4 hours ahead of est
 # that means deadline is 3:59
 # 3 minutes of leeway for emulator to start
-due_time = datetime(2024, 10, 28, 4, 2, 0, tzinfo=timezone.utc)
+due_time = datetime(2025, 2, 15, 4, 2, 0, tzinfo=timezone.utc)
 
 days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
 print(f'DAYS LATE: {days_late}')
@@ -58,6 +57,10 @@ elif days_late <= 3:
     penalty = -30
 elif days_late <= 4:
 	penalty = -40
+elif days_late <= 5:
+  penalty = -50
+elif days_late <= 6:
+  penalty = -60
 else:
     penalty = -100
 
@@ -121,7 +124,7 @@ for testcaseidx in range(num_testcases):
 	testcases.append(testcase_dict)
 
 # recursive testcase
-
+'''
 with open('./testcases/big.in', 'r') as fin:
 	tc_stdin = fin.read().rstrip()
 
@@ -142,7 +145,7 @@ testcase_dict = {
     "visibility": "visible",
 }
 #testcases.append(testcase_dict)
-
+'''
 
 
 # gradescope results
