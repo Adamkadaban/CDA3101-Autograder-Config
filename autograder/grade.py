@@ -6,25 +6,30 @@ from os import listdir as os_listdir
 import os.path
 from datetime import datetime, timezone
 
-context.log_level='debug'
+context.log_level='error'
 
 source_name = 'pa1.s'
-compiles_max = 10
-test_case_max = 80
+compiles_max = 20
+test_case_max = 70
 exists_max = 10
 
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
 submission_filename = os_listdir('/autograder/submission/')[0] # we assume a file exists, as a student must submit a file for the program to run
-source_path = f'/autograder/submission/{submission_filename}'
+#source_path = f'/autograder/submission/{submission_filename}'
+source_path = '/autograder/submission/pa1.txt'
+
+with open(source_path, 'rb') as fin:
+	source_code = fin.read()
 
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
-exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == 's' )
+exists = ( os.path.exists(source_path) )
 
 r = ssh(user='root', password='root', host='localhost', port=3101, timeout=ssh_timeout)
 r.upload_file(source_path, f'/root/{source_name}')
+r.upload('testcases')
 
 
 total_score = 0
@@ -37,7 +42,7 @@ student_submission_time = datetime.now(timezone.utc)
 # utc is 4 hours ahead of est
 # that means deadline is 3:59
 # 3 minutes of leeway for emulator to start
-due_time = datetime(2024, 10, 1, 4, 2, 0, tzinfo=timezone.utc)
+due_time = datetime(2025, 2, 15, 4, 2, 0, tzinfo=timezone.utc)
 
 days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
 print(f'DAYS LATE: {days_late}')
@@ -51,6 +56,12 @@ elif days_late <= 2:
     penalty = -20
 elif days_late <= 3:
     penalty = -30
+elif days_late <= 4:
+	penalty = -40
+elif days_late <= 5:
+  penalty = -50
+elif days_late <= 6:
+  penalty = -60
 else:
     penalty = -100
 
@@ -89,11 +100,14 @@ else:
 
 for testcaseidx in range(num_testcases):
 	with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
-		tc_stdin = fin.read().rstrip()
+		tc_stdin = fin.read()
+	r(f'stdbuf -oL ./{bin_name} <./testcases/Input/{testcaseidx + 1}.in >test-{testcaseidx + 1}.out')
+	student_stdout = r.download_data(f'test-{testcaseidx + 1}.out')
+
 	with open(f'./testcases/Output/{testcaseidx + 1}.out', 'rb') as fin:
 		tc_stdout = fin.read().rstrip()
 
-	student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
+	#student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
 
 	passed = ( [i for i in student_stdout if i not in b' \n\t\r'] == [i for i in tc_stdout if i not in b' \n\t\r'] )
 	if passed:
@@ -109,6 +123,31 @@ for testcaseidx in range(num_testcases):
 		"visibility": "visible",
 	}
 	testcases.append(testcase_dict)
+
+# recursive testcase
+'''
+with open('./testcases/big.in', 'r') as fin:
+	tc_stdin = fin.read().rstrip()
+
+probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' ) and (b'x28' in source_code or b'sp' in source_code)
+
+if probably_recursive:
+	total_score += recursive_max
+else:
+	print('probably not recursive')
+
+testcase_dict = {
+    "score": recursive_max if probably_recursive else 0,
+    "max_score": recursive_max,
+    "status": "passed" if passed else "failed",
+    "name_format": "text",
+    "output":"recursive" if probably_recursive else "not recursive",
+    "output_format": "text",
+    "visibility": "visible",
+}
+#testcases.append(testcase_dict)
+'''
+
 
 # gradescope results
 

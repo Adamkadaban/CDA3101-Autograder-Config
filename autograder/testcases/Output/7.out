@@ -1,2 +1,2 @@
-Enter two decimal integers and an operator (+ - / *): 
- Error: divide by zero 
+Input a string: String length: 6
+String is a palindrome (T/F): T
