@@ -16,8 +16,8 @@ exists_max = 10
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
 submission_filename = os_listdir('/autograder/submission/')[0] # we assume a file exists, as a student must submit a file for the program to run
-#source_path = f'/autograder/submission/{submission_filename}'
-source_path = '/autograder/submission/pa1.txt'
+source_path = f'/autograder/submission/{submission_filename}'
+#source_path = '/autograder/submission/pa1.txt'
 
 with open(source_path, 'rb') as fin:
 	source_code = fin.read()
@@ -25,7 +25,7 @@ with open(source_path, 'rb') as fin:
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
-exists = ( os.path.exists(source_path) )
+exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == 'txt')
 
 r = ssh(user='root', password='root', host='localhost', port=3101, timeout=ssh_timeout)
 r.upload_file(source_path, f'/root/{source_name}')
@@ -75,7 +75,7 @@ else:
 	print('no submission')
 	fail_dict = {
 		"score": 0,
-		"output": "No file with the `.s' extension found",
+		"output": "No file with the `.txt' extension found",
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
