@@ -1,152 +1,181 @@
 #!/usr/bin/env python3
 
 import json
-from pwn import *
-from os import listdir as os_listdir
-import os.path
-from datetime import datetime, timezone
-import pytz
+import os
 import math
+import yaml
+from datetime import datetime
+from pwn import context, ssh
 
-context.log_level='error'
+CONFIG_FILE = "config.yml"
+SUBMISSION_DIR = "/autograder/submission/"
+RESULTS_FILE = "/autograder/results/results.json"
+METADATA_FILE = "/autograder/submission_metadata.json"
+TESTCASES_DIR = "./testcases"
 
-source_name = 'pa1.s'
-compiles_max = 20
-test_case_max = 70
-exists_max = 10
-
-ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
-
-submission_filename = os_listdir('/autograder/submission/')[0] # we assume a file exists, as a student must submit a file for the program to run
-source_path = f'/autograder/submission/{submission_filename}'
-
-with open(source_path, 'rb') as fin:
-	source_code = fin.read()
-
-num_testcases = len(os.listdir('./testcases/Input'))
-points_per_testcase = test_case_max / num_testcases
-bin_name = source_name[:-2]
-exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == 's')
-
-r = ssh(user='root', password='root', host='localhost', port=3101, timeout=ssh_timeout)
-r.upload_file(source_path, f'/root/{source_name}')
-r.upload('testcases')
+context.log_level = "error"
 
 
-total_score = 0
-testcases = []
+def load_config():
+    try:
+        with open(CONFIG_FILE) as fin:
+            config = yaml.safe_load(fin)
+        return config
+    except Exception as e:
+        print(f"Error loading config: {e}")
+        write_results(0, "Autograder configuration error. Please contact staff.")
 
 
-## calculate late penalty
-student_submission_time = datetime.now(timezone.utc)
+def write_results(score, output, testcases=None, output_format="text"):
+    result = {"score": score, "output_format": output_format}
+    if testcases:
+        result["tests"] = testcases
+    if output:
+        result["output"] = output
+    with open(RESULTS_FILE, "w") as fout:
+        fout.write(json.dumps(result))
 
-with open('/autograder/submission_metadata.json') as fin:
-	submission_metadata = json.loads(fin.read())
-
-student_submission_time = datetime.fromisoformat(submission_metadata['created_at'])
-due_time = datetime.fromisoformat(submission_metadata['assignment']['due_date'])
-late_due_time = datetime.fromisoformat(submission_metadata['assignment']['late_due_date'])
-
-days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
-print(f'DAYS LATE: {days_late}')
-
-# -10 points per full or partial day late
-# -100 points if submitting past late date
-penalty = -10 * math.ceil(days_late)
-if student_submission_time > late_due_time:
-    penalty = -100
-
-# rubric
-
-## exists
-
-if exists:
-	total_score += exists_max
-else:
-	print('no submission')
-	fail_dict = {
-		"score": 0,
-		"output": "No file with the `.s` extension found",
-	}
-	with open('/autograder/results/results.json', 'w') as fout:
-		fout.write(json.dumps(fail_dict))
-	exit(0)
-## compiles
-
-compiles = ( r(f'gcc {source_name} -o {bin_name} 2>/dev/null; echo $?') == b'0')
-
-if compiles:
-	total_score += compiles_max
-else:
-	print('failed to compile')
-	fail_dict = {
-		"score": max(10 + penalty, 0),
-		"output": "Failed to compile",
-	}
-	with open('/autograder/results/results.json', 'w') as fout:
-		fout.write(json.dumps(fail_dict))
-	exit(0)
-
-## testcases
-
-for testcaseidx in range(num_testcases):
-	with open(f'./testcases/Input/{testcaseidx + 1}.in', 'r') as fin:
-		tc_stdin = fin.read()
-	r(f'stdbuf -oL ./{bin_name} <./testcases/Input/{testcaseidx + 1}.in >test-{testcaseidx + 1}.out')
-	student_stdout = r.download_data(f'test-{testcaseidx + 1}.out')
-
-	with open(f'./testcases/Output/{testcaseidx + 1}.out', 'rb') as fin:
-		tc_stdout = fin.read().rstrip()
-
-	#student_stdout = r(f'echo \'{tc_stdin}\' | ./{bin_name}')
-
-	passed = ( [i for i in student_stdout if i not in b' \n\t\r'] == [i for i in tc_stdout if i not in b' \n\t\r'] )
-	if passed:
-		total_score += points_per_testcase
-
-	testcase_dict = {
-		"score": points_per_testcase if passed else 0,
-		"max_score": points_per_testcase,
-		"status": "passed" if passed else "failed",
-		"name_format": "text",
-		"output":f"User input:\n{tc_stdin}\n\nStudent output:\n{student_stdout.decode()}\n\nExpected output:\n{tc_stdout.decode()}\n",
-		"output_format": "text",
-		"visibility": "visible",
-	}
-	testcases.append(testcase_dict)
-
-# recursive testcase
-'''
-with open('./testcases/big.in', 'r') as fin:
-	tc_stdin = fin.read().rstrip()
-
-probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' ) and (b'x28' in source_code or b'sp' in source_code)
-
-if probably_recursive:
-	total_score += recursive_max
-else:
-	print('probably not recursive')
-
-testcase_dict = {
-    "score": recursive_max if probably_recursive else 0,
-    "max_score": recursive_max,
-    "status": "passed" if passed else "failed",
-    "name_format": "text",
-    "output":"recursive" if probably_recursive else "not recursive",
-    "output_format": "text",
-    "visibility": "visible",
-}
-#testcases.append(testcase_dict)
-'''
+    # This tells run_autograder that grading was successful
+    exit(0)
 
 
-# gradescope results
-
-student_score = {
-	"score": max(total_score + penalty, 0),
-	"tests": testcases,
-}
+def remove_whitespace(s):
+    return [i for i in s if i not in b" \n\t\r"]
 
 
-with open('/autograder/results/results.json', 'w') as fout:
-	fout.write(json.dumps(student_score))
+def validate_config(config):
+    try:
+        required_keys = ["source_name", "exists_max", "compiles_max", "test_case_max"]
+        for key in required_keys:
+            if key not in config:
+                raise KeyError(f"Missing required key: {key}")
+
+        config["recursive_max"] = float(config.get("recursive_max", 0))
+        config["exists_max"] = float(config["exists_max"])
+        config["compiles_max"] = float(config["compiles_max"])
+        config["test_case_max"] = float(config["test_case_max"])
+
+        total_points = sum(
+            [
+                config[k]
+                for k in [
+                    "exists_max",
+                    "compiles_max",
+                    "test_case_max",
+                    "recursive_max",
+                ]
+            ]
+        )
+        assert total_points == 100, "Total points must sum to 100."
+        return config
+    except (KeyError, ValueError, AssertionError) as e:
+        print(f"Config validation error: {e}")
+        write_results(0, "Autograder configuration error. Please contact staff.")
+
+
+def get_submission_file():
+    files = os.listdir(SUBMISSION_DIR)
+    if not files:
+        write_results(0, "No submission file found.")
+    return os.path.join(SUBMISSION_DIR, files[0])
+
+
+def calculate_late_penalty(metadata):
+    submission_time = datetime.fromisoformat(metadata["created_at"])
+    due_time = datetime.fromisoformat(metadata["assignment"]["due_date"])
+    late_due_time = datetime.fromisoformat(metadata["assignment"]["late_due_date"])
+
+    days_late = (submission_time - due_time).total_seconds() / (60 * 60 * 24)
+    print(f"DAYS LATE: {days_late}")
+
+    penalty = min(-10 * math.ceil(days_late), 0)
+    if submission_time > late_due_time:
+        penalty = -100
+    return penalty
+
+
+def compile_code(r, source_name, bin_name):
+    return r(f"gcc {source_name} -o {bin_name} 2>/dev/null; echo $?") == b"0"
+
+
+def run_testcases(r, bin_name, test_case_max, num_testcases):
+    points_per_testcase = test_case_max / num_testcases
+    testcases = []
+    total_score = 0
+
+    for i in range(1, num_testcases + 1):
+        input_path = os.path.join(TESTCASES_DIR, "Input", f"{i}.in")
+        expected_output_path = os.path.join(TESTCASES_DIR, "Output", f"{i}.out")
+        output_path = f"test-{i}.out"
+
+        with open(input_path, "r") as fin:
+            tc_stdin = fin.read()
+        r(f"stdbuf -oL ./{bin_name} < {input_path} > {output_path}")
+        student_stdout = r.download_data(output_path)
+
+        with open(expected_output_path, "rb") as fin:
+            tc_stdout = fin.read()
+
+        passed = remove_whitespace(student_stdout) == remove_whitespace(tc_stdout)
+
+        if passed:
+            total_score += points_per_testcase
+
+        testcases.append(
+            {
+                "score": points_per_testcase if passed else 0,
+                "max_score": points_per_testcase,
+                "status": "passed" if passed else "failed",
+                "output": f"Input:\n{tc_stdin}\n\nOutput:\n{student_stdout.decode()}\n\nExpected:\n{tc_stdout.decode()}",
+                "output_format": "text",
+                "visibility": "visible",
+            }
+        )
+    return total_score, testcases
+
+
+def main():
+    config = validate_config(load_config())
+    source_name = config["source_name"]
+    bin_name = source_name[:-2]
+    required_extension = source_name.split(".")[-1]
+
+    submission_path = get_submission_file()
+    exists = submission_path.endswith(required_extension)
+    if not exists:
+        write_results(
+            0,
+            f"No file with the `{required_extension}` extension found.",
+            output_format="md",
+        )
+    total_score = config["exists_max"]
+
+    r = ssh(user="root", password="root", host="localhost", port=3101, timeout=600)
+    r.upload_file(submission_path, f"/root/{source_name}")
+    r.upload(TESTCASES_DIR)
+
+    with open(METADATA_FILE) as fin:
+        submission_metadata = json.load(fin)
+    penalty = calculate_late_penalty(submission_metadata)
+
+    if not compile_code(r, source_name, bin_name):
+        write_results(max(10 + penalty, 0), "Failed to compile")
+    total_score += config["compiles_max"]
+
+    num_testcases = len(os.listdir(os.path.join(TESTCASES_DIR, "Input")))
+    test_score, testcases = run_testcases(
+        r, bin_name, config["test_case_max"], num_testcases
+    )
+    total_score += test_score
+
+    # TODO: Figure out smart way to have recursive points
+    # This should probably be manually graded?
+    # if config["recursive_max"] > 0:
+    #    recursive_score, recursive_case = run_recursive_case(r, config[""])
+
+    student_score = max(total_score + penalty, 0)
+    write_results(student_score, "", testcases)
+
+
+if __name__ == "__main__":
+    main()
