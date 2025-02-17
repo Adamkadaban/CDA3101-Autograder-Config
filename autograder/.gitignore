@@ -1,5 +1,6 @@
 *.zip
 
-emulator/disk.qcow2
-emulator/initrd.img-4.9.0-4-arm64
-emulator/vmlinuz-4.9.0-4-arm64
+# Now stored in git lfs
+#emulator/disk.qcow2
+#emulator/initrd.img-4.9.0-4-arm64
+#emulator/vmlinuz-4.9.0-4-arm64
