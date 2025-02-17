@@ -12,6 +12,12 @@ Read more about files on the [gradescope wiki](https://gradescope-autograders.re
     - If you would like to use these files, install the git plugin using the link above before cloning. 
     - If you'd like to provide your own emulator files, simply place them in the linked directory.
 
+- If you already have Git LFS installed and would not like to clone the emulator files, you can run the following:
+
+```bash
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Adamkadaban/CDA3101-Autograder-Config
+```
+
 **2. Set up config.yml**
 
 - Create a file in `/autograder/config.yml` according to the example below
