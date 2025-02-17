@@ -43,19 +43,18 @@ student_submission_time = datetime.now(timezone.utc)
 with open('/autograder/submission_metadata.json') as fin:
 	submission_metadata = json.loads(fin.read())
 
-# This seems to be in 
 student_submission_time = datetime.fromisoformat(submission_metadata['created_at'])
-
-due_time = datetime(2025, 2, 14 + 2, 23, 59, 59, tzinfo=pytz.timezone('US/Eastern'))
+due_time = datetime.fromisoformat(submission_metadata['users'][0]['assignment']['due_date'])
+late_due_time = datetime.fromisoformat(submission_metadata['users'][0]['assignment']['late_due_date'])
 
 days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
 print(f'DAYS LATE: {days_late}')
 
-# Students may submit up to `max_days_late` days late. 
 # -10 points per full or partial day late
 # -100 points if submitting past late date
-max_days_late = 4
-penalty = -100 if days_late > max_days_late else -10 * math.ceil(days_late)
+penalty = -10 * math.ceil(days_late)
+if student_submission_time > late_due_time:
+    penalty = -100
 
 # rubric
 
