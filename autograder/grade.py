@@ -44,8 +44,8 @@ with open('/autograder/submission_metadata.json') as fin:
 	submission_metadata = json.loads(fin.read())
 
 student_submission_time = datetime.fromisoformat(submission_metadata['created_at'])
-due_time = datetime.fromisoformat(submission_metadata['users'][0]['assignment']['due_date'])
-late_due_time = datetime.fromisoformat(submission_metadata['users'][0]['assignment']['late_due_date'])
+due_time = datetime.fromisoformat(submission_metadata['assignment']['due_date'])
+late_due_time = datetime.fromisoformat(submission_metadata['assignment']['late_due_date'])
 
 days_late = ( (student_submission_time - due_time).total_seconds() / (60 * 60 * 24) )
 print(f'DAYS LATE: {days_late}')
