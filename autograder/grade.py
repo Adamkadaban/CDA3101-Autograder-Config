@@ -12,6 +12,12 @@ import yaml
 with open('config.yml') as fin:
 	config_data = yaml.safe_load(fin)
 
+fail_dict = {
+	"score": 0,
+	"output": f"Autograder configuration error. Please contact staff.",
+	"output_format": "text"
+}
+
 try:
 	source_name = config_data['source_name']
 	exists_max = float(config_data['exists_max'])
@@ -20,19 +26,28 @@ try:
 except KeyError as e:
 	print(str(e))
 	print('Missing one of the required fields in config.yml')
-	exit(-1)
+	with open('/autograder/results/results.json', 'w') as fout:
+		fout.write(json.dumps(fail_dict))
+	exit(0)
 except ValueError as e:
 	print(str(e))
 	print('Unable to parse one or more *_max values')
-	exit(-1)
+	with open('/autograder/results/results.json', 'w') as fout:
+		fout.write(json.dumps(fail_dict))
+	exit(0)
 
 recursive_max = float(config_data['recursive_max']) if 'recursive_max' in config_data else None
 
 max_points = recursive_max or 0
 max_points += exists_max + compiles_max + test_case_max
 
-assert(max_points == 100)
-
+try:
+	assert(max_points == 100)
+except AssertionError as e:
+	print('More or less than 100 points allocated to autograder')
+	with open('/autograder/results/results.json', 'w') as fout:
+		fout.write(json.dumps(fail_dict))
+	exit(0)
 
 
 file_extension_required = source_name.split('.')[-1]
@@ -76,7 +91,7 @@ print(f'DAYS LATE: {days_late}')
 # -100 points if submitting past late date
 penalty = min(-10 * math.ceil(days_late), 0)
 if student_submission_time > late_due_time:
-    penalty = -100
+	penalty = -100
 
 # rubric
 
@@ -151,13 +166,13 @@ if recursive_max:
 		print('probably not recursive')
 
 	testcase_dict = {
-	    "score": recursive_max if probably_recursive else 0,
-	    "max_score": recursive_max,
-	    "status": "passed" if passed else "failed",
-	    "name_format": "text",
-	    "output":"recursive" if probably_recursive else "not recursive",
-	    "output_format": "text",
-	    "visibility": "visible",
+		"score": recursive_max if probably_recursive else 0,
+		"max_score": recursive_max,
+		"status": "passed" if passed else "failed",
+		"name_format": "text",
+		"output":"recursive" if probably_recursive else "not recursive",
+		"output_format": "text",
+		"visibility": "visible",
 	}
 	testcases.append(testcase_dict)
 
