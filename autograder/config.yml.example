@@ -1,0 +1,21 @@
+# Required
+# This file extension is used to see if the file exists
+source_name: pa1.s
+
+# Required
+# Max number of points for submitting code with the file extension defined above
+exists_max: 10
+
+# Required
+# Max number of points for code compiling
+compiles_max: 20
+
+# Required
+# Max number of points for passing testcases
+# Points will be evenly divided between the testcases provided
+test_case_max: 70
+
+# Optional
+# Max number of points for having code that is recursive
+# For now, this is only for points and must be graded manually after the autograder runs.
+recursive_max: 10
