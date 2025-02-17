@@ -4,8 +4,7 @@ import json
 from pwn import *
 from os import listdir as os_listdir
 import os.path
-from datetime import datetime, timezone
-import pytz
+from datetime import datetime
 import math
 import yaml
 
@@ -14,7 +13,7 @@ with open('config.yml') as fin:
 
 fail_dict = {
 	"score": 0,
-	"output": f"Autograder configuration error. Please contact staff.",
+	"output": "Autograder configuration error. Please contact staff.",
 	"output_format": "text"
 }
 
@@ -43,7 +42,7 @@ max_points += exists_max + compiles_max + test_case_max
 
 try:
 	assert(max_points == 100)
-except AssertionError as e:
+except AssertionError:
 	print('More or less than 100 points allocated to autograder')
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
