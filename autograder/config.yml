@@ -12,4 +12,4 @@ test_case_max: 70
 
 # max number of points for having code that is recursive
 # overflow testcase must be in `./testcases/big.in` if this field is provided
-recursive_max: 10
+#recursive_max: 10
