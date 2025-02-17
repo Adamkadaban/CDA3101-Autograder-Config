@@ -3,8 +3,6 @@
 MAXRETRYS=5
 TIMEOUT=60
 
-#cp /autograder/submission/pa1.s /autograder/source/pa1.s
-
 cd /autograder/source
 
 start_emulator() {
@@ -12,6 +10,8 @@ start_emulator() {
     NCPU=2
     MEM=1G
 
+    # This starts the emulator in the background without a GUI
+    # Make sure to modify this if different emulator files are used
     qemu-system-aarch64 -smp ${NCPU} -m ${MEM} -M virt -cpu cortex-a57  \
                     -initrd ./emulator/initrd.img-4.9.0-4-arm64 \
                     -kernel ./emulator/vmlinuz-4.9.0-4-arm64 -append "root=/dev/sda2 console=ttyAMA0" \
@@ -29,45 +29,49 @@ start_emulator() {
 status=0
 
 for try in $(seq 1 $MAXRETRYS); do
-	echo "Try $try"
+    echo "Try $try"
     nc -z localhost 3101
     if [ $? -ne 0 ]; then
         start_emulator
     fi
 
-    # wait for port to open. this indicates service is running
+    # Wait for port to open. this indicates service is running
     until nc -w 10 127.0.0.1 3101; do sleep 1; done
 
-    # to make sure ssh has had a chance to start properly
+    # To make sure ssh has had a chance to start properly
     sleep 10
 
-	echo "Running grading script"
+    echo "Running grading script"
     timeout -v $TIMEOUT python3 grade.py
 
 
-	case $? in
-		0)
-			echo "Grading succeeded."
-			status=0
-			break
-			;;
-		124)
-			echo "Timeout."
-			status=0
-			cp timeout.json /autograder/results/results.json
-			;;
-		*)
-			echo "Grading failed. Retrying..."
-			status=1
-			sleep 5
-			;;
-	esac
+    case $? in
+        0)
+            # This is for when the grade.py script was able to determine the student's grade
+            # This includes when the code doesn't exist, when the code can't compile, etc. 
+            echo "Grading succeeded."
+            status=0
+            break
+            ;;
+        124)
+            # This is for when python manages to timeout
+            echo "Timeout."
+            status=0
+            cp timeout.json /autograder/results/results.json
+            ;;
+        *)
+            # For all other cases, attempt to retry grading
+            echo "Grading failed. Retrying..."
+            status=1
+            sleep 5
+            ;;
+    esac
 done
 
 # If grading still didn't work after max trys
 if [ $status -eq 1 ]; then
-	echo "Grading failed with unknown error."
-	cp fail.json /autograder/results/results.json
+    echo "Grading failed with unknown error."
+    cp fail.json /autograder/results/results.json
 fi
 
 
