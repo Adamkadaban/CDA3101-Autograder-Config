@@ -14,7 +14,7 @@ Read more about files on the [gradescope wiki](https://gradescope-autograders.re
 
 **2. Set up config.yml**
 
-- Create a file in [/autograder/config.yml](./autograder/emulator) according to the example below
+- Create a file in `/autograder/config.yml` according to the example below
 
 ```yaml
 # Required
