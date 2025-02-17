@@ -7,13 +7,37 @@ import os.path
 from datetime import datetime, timezone
 import pytz
 import math
+import yaml
+
+with open('config.yml') as fin:
+	config_data = yaml.safe_load(fin)
+
+try:
+	source_name = config_data['source_name']
+	exists_max = float(config_data['exists_max'])
+	compiles_max = float(config_data['compiles_max'])
+	test_case_max = float(config_data['test_case_max'])
+except KeyError as e:
+	print(str(e))
+	print('Missing one of the required fields in config.yml')
+	exit(-1)
+except ValueError as e:
+	print(str(e))
+	print('Unable to parse one or more *_max values')
+	exit(-1)
+
+recursive_max = float(config_data['recursive_max']) if 'recursive_max' in config_data else None
+
+max_points = recursive_max or 0
+max_points += exists_max + compiles_max + test_case_max
+
+assert(max_points == 100)
+
+
+
+file_extension_required = source_name.split('.')[-1]
 
 context.log_level='error'
-
-source_name = 'pa1.s'
-compiles_max = 20
-test_case_max = 70
-exists_max = 10
 
 ssh_timeout = 600 # 10 minutes. (emulator needs to start first)
 
@@ -26,7 +50,7 @@ with open(source_path, 'rb') as fin:
 num_testcases = len(os.listdir('./testcases/Input'))
 points_per_testcase = test_case_max / num_testcases
 bin_name = source_name[:-2]
-exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == 's')
+exists = ( os.path.exists(source_path) and source_path.split('.')[-1] == file_extension_required)
 
 r = ssh(user='root', password='root', host='localhost', port=3101, timeout=ssh_timeout)
 r.upload_file(source_path, f'/root/{source_name}')
@@ -38,8 +62,6 @@ testcases = []
 
 
 ## calculate late penalty
-student_submission_time = datetime.now(timezone.utc)
-
 with open('/autograder/submission_metadata.json') as fin:
 	submission_metadata = json.loads(fin.read())
 
@@ -52,7 +74,7 @@ print(f'DAYS LATE: {days_late}')
 
 # -10 points per full or partial day late
 # -100 points if submitting past late date
-penalty = -10 * math.ceil(days_late)
+penalty = min(-10 * math.ceil(days_late), 0)
 if student_submission_time > late_due_time:
     penalty = -100
 
@@ -66,7 +88,8 @@ else:
 	print('no submission')
 	fail_dict = {
 		"score": 0,
-		"output": "No file with the `.s` extension found",
+		"output": f"No file with the `{file_extension_required}` extension found",
+		"output_format": "md"
 	}
 	with open('/autograder/results/results.json', 'w') as fout:
 		fout.write(json.dumps(fail_dict))
@@ -116,28 +139,28 @@ for testcaseidx in range(num_testcases):
 	testcases.append(testcase_dict)
 
 # recursive testcase
-'''
-with open('./testcases/big.in', 'r') as fin:
-	tc_stdin = fin.read().rstrip()
+if recursive_max:
+	with open('./testcases/big.in', 'r') as fin:
+		tc_stdin = fin.read().rstrip()
 
-probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' ) and (b'x28' in source_code or b'sp' in source_code)
+	probably_recursive = ( r(f'echo \'{tc_stdin}\' | ./{bin_name} 2>dev/null; echo $?') == b'139' ) and (b'x28' in source_code or b'sp' in source_code)
 
-if probably_recursive:
-	total_score += recursive_max
-else:
-	print('probably not recursive')
+	if probably_recursive:
+		total_score += recursive_max
+	else:
+		print('probably not recursive')
 
-testcase_dict = {
-    "score": recursive_max if probably_recursive else 0,
-    "max_score": recursive_max,
-    "status": "passed" if passed else "failed",
-    "name_format": "text",
-    "output":"recursive" if probably_recursive else "not recursive",
-    "output_format": "text",
-    "visibility": "visible",
-}
-#testcases.append(testcase_dict)
-'''
+	testcase_dict = {
+	    "score": recursive_max if probably_recursive else 0,
+	    "max_score": recursive_max,
+	    "status": "passed" if passed else "failed",
+	    "name_format": "text",
+	    "output":"recursive" if probably_recursive else "not recursive",
+	    "output_format": "text",
+	    "visibility": "visible",
+	}
+	testcases.append(testcase_dict)
+
 
 
 # gradescope results
