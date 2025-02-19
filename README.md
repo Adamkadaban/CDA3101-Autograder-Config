@@ -75,7 +75,7 @@ zip -u autograder.zip config.yml
 zip -d autograder.zip testcases/Input/10.in testcases/Output/10.out
 ```
 
-**5 Upload to gradescope**
+**5. Upload to gradescope**
 
 - Go to "Configure Autograder" for the assignment
     - Select "Zip file upload"
