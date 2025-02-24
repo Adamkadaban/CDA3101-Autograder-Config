@@ -1,6 +1,6 @@
 # Required
 # This file extension is used to see if the file exists
-source_name: pa1.s
+source_name: pa2.s
 
 # Required
 # Max number of points for submitting code with the file extension defined above
@@ -19,3 +19,8 @@ test_case_max: 70
 # Max number of points for having code that is recursive
 # For now, this is only for points and must be graded manually after the autograder runs.
 recursive_max: 10
+
+# Optional
+# Typos which will be removed as if whitespace
+typo_list: 
+    - "empty"
