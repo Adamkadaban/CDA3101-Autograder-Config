@@ -116,13 +116,13 @@ def run_testcases(r, bin_name, test_case_max, num_testcases):
         with open(input_path, "r") as fin:
             tc_stdin = fin.read()
         r(f"stdbuf -oL ./{bin_name} < {input_path} > {output_path}")
-        student_stdout = r.downlo ad_data(output_path)
+        student_stdout = r.download_data(output_path)
 
         with open(expected_output_path, "rb") as fin:
             tc_stdout = fin.read()
 
         passed = remove_whitespace(student_stdout) == remove_whitespace(tc_stdout)
-		passed = passed & remove_typo(student_stdout) == student_stdout(tc_stdout)
+        passed = passed and remove_typo(student_stdout) == student_stdout(tc_stdout)
 
         if passed:
             total_score += points_per_testcase
