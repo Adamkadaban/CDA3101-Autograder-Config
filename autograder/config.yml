@@ -20,3 +20,8 @@ test_case_max: 50
 # For now, this is only for points and must be graded manually after the autograder runs.
 recursive_max: 30
 
+# Optional
+# Typos present in skeleton file, correction done by removal of all typos.
+typo_list:
+  - "betwen"
+  - "between"

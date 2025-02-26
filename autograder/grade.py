@@ -43,9 +43,10 @@ def remove_whitespace(s):
     return [i for i in s if i not in b" \n\t\r"]
 
 def remove_typo(s):
+	s = s.decode("utf-8")
 	s = s.replace("betwen", "")
 	s = s.replace("between", "")
-	return s
+	return s.encode("utf-8")
 
 
 def validate_config(config):
@@ -122,7 +123,7 @@ def run_testcases(r, bin_name, test_case_max, num_testcases):
             tc_stdout = fin.read()
 
         passed = remove_whitespace(student_stdout) == remove_whitespace(tc_stdout)
-        passed = passed and remove_typo(student_stdout) == student_stdout(tc_stdout)
+        passed = passed and remove_typo(student_stdout) == remove_typo(tc_stdout)
 
         if passed:
             total_score += points_per_testcase
